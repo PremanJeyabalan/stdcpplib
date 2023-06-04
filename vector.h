@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include<iostream>
 
-namespace epc
+namespace CustomStd
 {
    template <typename T, size_t N>
    class vector

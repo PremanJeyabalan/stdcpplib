@@ -8,5 +8,7 @@
 namespace CustomStd {
     class unique_ptr {
         //insert unique pointer implementation here...
-    }
+    };
 }
+
+#endif

@@ -7,5 +7,7 @@
 namespace CustomStd {
     class string {
         //insert sso string implementation here...
-    }
+    };
 }
+
+#endif

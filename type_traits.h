@@ -40,7 +40,24 @@ namespace CustomStd {
 
     template <typename T>
     using remove_reference_t = typename remove_reference<T>::type;
+
+    template <typename T>
+    struct is_floating_point {
+        static const bool value = false;
+    };
     
+    template <>
+    struct is_floating_point<float> {
+        static const bool value = true;
+    };
+    template <>
+    struct is_floating_point<double> {
+        static const bool value = true;
+    };
+    template <>
+    struct is_floating_point<long double> {
+        static const bool value = true;
+    };
 }
 
 #endif

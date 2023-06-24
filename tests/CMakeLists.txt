@@ -46,3 +46,10 @@ package_add_test_with_libraries(
     "${PROJECT_SOURCE_DIR}/tests"
 )
 
+
+package_add_test_with_libraries(
+    UniquePtrTests
+    unique_ptr.cpp
+    Vector
+    "${PROJECT_SOURCE_DIR}/tests"
+)

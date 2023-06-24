@@ -2,7 +2,7 @@
 #define LIB_VECTOR
 
 #include <cstdlib>
-#include<iostream>
+#include <memory>
 
 namespace CustomStd
 {
@@ -243,20 +243,6 @@ namespace CustomStd
                   return; 
             } 
             
-         }
-
-         friend std::ostream& operator<<(std::ostream& os, const vector& v) {
-            os << "----------------" << std::endl;
-            os << "[";
-
-            for (size_t i = 0; i < v.size(); i++) os << v[i] << ", ";
-
-            os << "]" << std::endl;
-            os << "_size: " << v.size() << std::endl;
-            os << "_capacity: " << v.capacity() << std::endl;
-            os << "----------------" << std::endl;
-
-            return os;
          }
 
       private:

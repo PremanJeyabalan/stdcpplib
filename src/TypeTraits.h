@@ -5,23 +5,37 @@
 #include <iostream>
 
 namespace CustomStd {
-    template <typename T> 
-    struct is_reference {
-        static const bool value = false;
+
+    template <class T, T v>
+    struct integral_constant {
+        static constexpr T value = v;
+        using value_type = T;
+        using type = integral_constant;
+        constexpr operator value_type() const noexcept {
+            return value;
+        }
+        const value_type operator()() const noexcept {
+            return value;
+        }
     };
 
-    template <typename T> 
-    struct is_reference<T&> {
-        static const bool value = true;
-    };
+    template <bool B>
+    using bool_constant = integral_constant<bool, B>;
+
+    typedef bool_constant<true> true_type;
+    typedef bool_constant<false> false_type;
 
     template <typename T> 
-    struct is_reference<T&&> {
-        static const bool value = true;
-    };
+    struct is_reference : CustomStd::false_type {};
 
+    template <typename T> 
+    struct is_reference<T&> : CustomStd::true_type {};
+
+    template <typename T> 
+    struct is_reference<T&&> : CustomStd::true_type {};
+    
     template <typename T>
-    inline bool is_reference_v = is_reference<T>::value;
+    inline constexpr bool is_reference_v = is_reference<T>::value;
 
     template <typename T>
     struct remove_reference {
@@ -57,6 +71,16 @@ namespace CustomStd {
     template <>
     struct is_floating_point<long double> {
         static const bool value = true;
+    };
+
+    template <bool B, typename T, typename F>
+    struct conditional { 
+        using type = T;
+    };
+
+    template <typename T, typename F>
+    struct conditional<false, T, F> {
+        using type = F;
     };
 }
 

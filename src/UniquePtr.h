@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include<iostream>
+#include <tuple>
 #include "TypeTraits.h"
 
 namespace CustomStd {
@@ -29,6 +30,7 @@ namespace CustomStd {
             delete[] ptr;
         }
     };
+
     template <typename T, typename D = CustomStd::default_delete<T>>
     class unique_ptr {
         typedef std::tuple<T*, D> tuple_data_type;
@@ -45,19 +47,19 @@ namespace CustomStd {
         }
 
         explicit unique_ptr(pointer_type ptr) : _data(ptr, deleter_type()) {
-            static_assert(!std::is_pointer_v<pointer_type>, "ensuring no null function pointer deleters");
+            static_assert(!std::is_pointer_v<deleter_type>, "ensuring no null function pointer deleters");
         }
 
         unique_ptr(
             pointer_type ptr,
-            typename CustomStd::conditional<CustomStd::is_reference_v, deleter_type, const deleter_type&>::type deleter
+            typename CustomStd::conditional<CustomStd::is_reference_v<deleter_type>, deleter_type, const deleter_type&>::type deleter
         ) : _data(ptr, deleter) {}
 
         unique_ptr(
             pointer_type ptr,
             CustomStd::remove_reference_t<deleter_type>&& deleter
         ) : _data(std::move(ptr), std::move(deleter)) {
-            static_assert(!CustomStd::is_reference_v<deleter_type>, "rvalue deleter cannot be bound to a reference")
+            static_assert(!CustomStd::is_reference_v<deleter_type>, "rvalue deleter cannot be bound to a reference");
         }
 
         //MOVE CONSTRUCTORS
@@ -90,10 +92,12 @@ namespace CustomStd {
             return *this;
         }
 
-        // TODO: MOVE ASSIGNMENT OPERATOR WITH TYPEDEF
-
+        unique_ptr& operator=(std::nullptr_t) {
+            reset();
+            return *this;
+        }
         // 
-
+        // OBSERVERS
         pointer_type operator->() const {
             return get();
         }
@@ -102,7 +106,37 @@ namespace CustomStd {
             return std::get<0>(_data);
         }
 
-        
+        std::add_lvalue_reference_t<deleter_type> get_deleter() {
+            return std::get<1>(_data);
+        }
+
+        std::add_lvalue_reference_t<std::add_const_t<deleter_type>> get_deleter() const {
+            return std::get<1>(_data);
+        }
+
+        //Not sure about this one
+        operator bool () const {
+            return get() == nullptr;
+        }
+
+        //MODIFIERS
+        pointer_type release() {
+            pointer_type ptr = get();
+            std::get<0>(_data) = nullptr;
+            return ptr;
+        }
+
+        void reset(pointer_type ptr = pointer_type()) {
+            if (ptr != get()) {
+                get_deleter()(get());
+                std::get<0>(_data) = ptr;
+            }
+        }
+
+        void swap(unique_ptr&& ptr) {
+            using std::swap;
+            swap(_data, ptr._data);
+        }
 
         //DISABLE COPY AND COPY ASSIGNMENT OPERATORS
         unique_ptr(const unique_ptr&) = delete;
@@ -120,10 +154,29 @@ namespace CustomStd {
         tuple_data_type _data;
     };
 
+    namespace detail {
+        template <typename>
+        constexpr bool is_unbounded_array_v = false;
+
+        template <typename T>
+        constexpr bool is_unbounded_array_v<T[]> = true;
+
+        template <typename>
+        constexpr bool is_bounded_array_v = false;
+
+        template <typename T, std::size_t N>
+        constexpr bool is_bounded_array_v<T[N]> = true;
+    }
+
     template <typename T, typename... Ts>
-    CustomStd::unique_ptr<T> make_unique(Ts&&... params) {
-        return CustomStd::unique_ptr(new T(std::forward<Ts>(params...)));
+    std::enable_if_t<!std::is_array_v<T>, CustomStd::unique_ptr<T>> make_unique(Ts&&... params) {
+        return CustomStd::unique_ptr(new T(std::forward<Ts>(params)...));
     };
+
+    template <typename T>
+    std::enable_if_t<detail::is_unbounded_array_v<T>, CustomStd::unique_ptr<T>> make_unique(std::size_t n) {
+        return CustomStd::unique_ptr<T>(new std::remove_extent_t<T>[n]());
+    }
 
 }
 

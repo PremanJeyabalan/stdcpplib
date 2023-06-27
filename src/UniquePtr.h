@@ -10,10 +10,13 @@
 namespace CustomStd {
     template <typename T>
     struct default_delete {
-        default_delete() {}
+        constexpr default_delete() noexcept = default;
 
-        template <typename U>
-        default_delete(const default_delete<U>&) {}
+        // Allows conversion from a deleter for objects of another type U, only if U* is convertible to T*
+        template <typename U,
+            typename = std::enable_if_t<std::is_convertible_v<U*, T*>, U>
+        >
+        default_delete(const default_delete<U>&) noexcept {}
 
         void operator()(T* ptr) const {
             static_assert(sizeof(T) > 0, "Class type needs to be complete, incomplete types cannot be deleted");
@@ -24,7 +27,18 @@ namespace CustomStd {
 
     template <typename T>
     struct default_delete<T[]> {
-        void operator()(T* ptr) const {
+        // Default Constructor
+        constexpr default_delete() noexcept = default;
+
+        //Allows conversion from a deleter for arrays of another type, such as a const-qualified version of T.
+        //Conversions from types derived from T are not allowed, UB to delete[] an array of derived types through a pointer of a base type
+        template<typename U,
+            typename = std::enable_if_t<std::is_convertible_v<U*[], T*[]>>
+        >
+        default_delete(const default_delete<U[]>&) noexcept {}
+
+        template<typename U>
+        std::enable_if_t<std::is_convertible_v<U*[], T*[]>> operator()(U* ptr) const {
             static_assert(sizeof(T) > 0, "Class type needs to be complete, incomplete types cannot be deleted");
 
             delete[] ptr;

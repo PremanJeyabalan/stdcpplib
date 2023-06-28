@@ -21,5 +21,10 @@ Make list of stl containers and functions I want to replicate, or new ones to cr
 ## vector
 Added initial implementation of vector, still needs full allocator functionality, use of uniqu ptrs(self created), initializer list, exception safe, thread safety (maybe...).
 
+## Learning I've gained from implementations
+
+### Unique Pointer
+1. 2 Move constructors, 1 for same type, and another for implicit type conversions, like from derived class to base.
+2. Pointer to member variable typedefs
 
 

@@ -10,8 +10,7 @@ project(
     DESCRIPTION "My take on the standard library"
     LANGUAGES CXX
 )
-
-add_library(Vector src/Vector.h)
+add_library(Vector INTERFACE src/Vector.h src/UniquePtr.h)
 
 set_property(TARGET Vector 
     PROPERTY CXX_STANDARD 17)

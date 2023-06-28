@@ -53,3 +53,10 @@ package_add_test_with_libraries(
     Vector
     "${PROJECT_SOURCE_DIR}/tests"
 )
+
+package_add_test_with_libraries(
+        StringTests
+        string.cpp
+        Vector
+        "${PROJECT_SOURCE_DIR}/tests"
+)

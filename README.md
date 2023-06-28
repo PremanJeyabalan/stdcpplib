@@ -8,7 +8,7 @@ Make list of stl containers and functions I want to replicate, or new ones to cr
 ### Current List (Tick means in progress/finished)
 - [X] Vector (SBO)
 - [ ] String (SSO)
-- [ ] Unique Ptr + Make Unique + Deleter
+- [X] Unique Ptr + Make Unique + Deleter
 - [ ] Shared Ptr + Make Shared + Deleter
 - [ ] Unordered + Ordered Map
 - [ ] Dequeue
@@ -27,4 +27,11 @@ Added initial implementation of vector, still needs full allocator functionality
 1. 2 Move constructors, 1 for same type, and another for implicit type conversions, like from derived class to base.
 2. Pointer to member variable typedefs
 
+## Learning I've gained from implementations
+
+### Unique Pointer
+1. 2 Move constructors, 1 for same type, and another for implicit type conversions, like from derived class to base.
+2. Pointer to member variable typedefs
+3. Use cases for constexpr and noexcept, especially for constructors
+4. SFINAE templates for constructors
 

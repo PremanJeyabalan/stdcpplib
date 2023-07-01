@@ -5,14 +5,20 @@
 #include <String.h>
 
 
-struct StringTest : public testing::Test {
+struct StringTestFixture : public testing::Test {
 
 };
 
-TEST_F(StringTest, foo) {
+TEST(StringTest, DefaultCtorValid) {
     CustomStd::string k;
-    CustomStd::string l {k};
-    CustomStd::string m {k.data(), 0};
-
-    EXPECT_EQ(l.size(), 0);
+    EXPECT_EQ(k.size(), 0) << " Empty string should have size 0";
+    EXPECT_EQ(k.capacity(), 22) << " should instead have capacity 22";
 }
+
+TEST(StringTest, CStringCtorValid) {
+    CustomStd::string k {"abcdefg"};
+
+    EXPECT_EQ(k.size(), 7);
+    EXPECT_EQ(std::string{k.data()}, "abcdefg");
+}
+

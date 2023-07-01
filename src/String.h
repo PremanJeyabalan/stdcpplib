@@ -15,18 +15,8 @@ namespace CustomStd {
 
         string(const string& str) {
             const size_t size = str.size();
-            if (size <= _short_capacity) {
-                _short.size_flag = 0;
-                set_short_size(size);
-            } else {
-                _long.capacity = size;
-                if ((_long.capacity & 0x01) == 0) _long.capacity++;
-
-                _long.size = size;
-                _long.data = new char[_long.capacity + 1];
-            }
-
-            memcpy(ptr(), str.data(), capacity() + 1);
+            if (size <= _short_capacity) copy_short_string(size, str._short.buffer);
+            else copy_long_string(size, str._long.data);
         }
 
 //        len = 9
@@ -34,69 +24,26 @@ namespace CustomStd {
 
         string(const string& str, size_t pos, size_t len = npos) {
             size_t max_len = str.size() - 1 - pos;
-            if (len == npos || len > max_len) {
-                if (max_len <= _short_capacity) {
-                    _short.size_flag = 0;
-                    set_short_size(max_len);
-                } else {
-                    _long.capacity = max_len;
-                    if ((_long.capacity & 0x01) == 0) _long.capacity++;
+            size_t str_size = len == npos || len > max_len ?
+                max_len : 1 + len;
 
-                    _long.size = max_len;
-                    _long.data = new char[_long.capacity + 1];
-                }
-
-                memcpy(ptr(), str.data(), capacity() + 1);
-            } else {
-                size_t size = 1 + len;
-                if (size <= _short_capacity) {
-                    _short.size_flag = 0;
-                    set_short_size(size);
-                } else {
-                    _long.capacity = size;
-                    if ((_long.capacity & 0x01) == 0) _long.capacity++;
-
-                    _long.size = size;
-                    _long.data = new char[_long.capacity + 1];
-                }
-
-                memcpy(ptr(), str.data(), capacity() + 1);
-            }
+            if (str_size <= _short_capacity) copy_short_string(str_size, str._short.buffer + pos);
+            else copy_long_string(str_size, str._long.data + pos);
         }
 
-        string(const char* arg) {
-            size_t size = strlen(arg);
-            if (size <= _short_capacity) {
-                _short.size_flag = 0;
-                set_short_size(size);
-            } else {
-                _long.capacity = size;
-                if ((_long.capacity & 0x01) == 0) _long.capacity++;
-
-                _long.size = size;
-                _long.data = new char[_long.capacity + 1];
-            }
-
-            memcpy(ptr(), arg, size+1);
+        string(const char* str) {
+            size_t size = strlen(str);
+            if (size <= _short_capacity) copy_short_string(size, str);
+            else copy_long_string(size, str);
         }
 
-        string(const char* arg, size_t n) {
-            size_t size = strlen(arg);
+        string(const char* str, size_t n) {
+            size_t size = strlen(str);
 
             if (n > size || n < 1) throw std::out_of_range("too large");
 
-            if (n <= _short_capacity) {
-                _short.size_flag = 0;
-                set_short_size(n);
-            } else {
-                _long.capacity = n;
-                if ((_long.capacity & 0x01) == 0) _long.capacity++;
-
-                _long.size = n;
-                _long.data = new char[_long.capacity + 1];
-            }
-
-            memcpy(ptr(), arg, n+1);
+            if (n <= _short_capacity) copy_short_string(n, str);
+            else copy_long_string(n, str);
         }
 
         string(size_t n, char c) {
@@ -116,7 +63,17 @@ namespace CustomStd {
             memset(ptr(), c, n);
         }
 
-        
+        string(string&& str) noexcept {
+            if (str.is_short()) copy_short_string(str.short_size(), str._short.buffer);
+            else {
+                _long.capacity = str._long.size;
+                if ((_long.capacity & 0x01) == 0) _long.capacity++;
+
+                _long.size = str._long.size;
+                _long.data = str._long.data;
+                str._long.data = nullptr;
+            }
+        }
 
         ~string() {
             if (!is_short()) delete[] _long.data;
@@ -157,6 +114,22 @@ namespace CustomStd {
         const char* ptr() const {
             return is_short() ?
                 _short.buffer : _long.data;
+        }
+
+        void copy_short_string(size_t str_size, const char* str) {
+            _short.size_flag = 0;
+            set_short_size(str_size);
+
+            memcpy(_short.buffer, str, str_size);
+        }
+
+        void copy_long_string(size_t str_size, const char* str) {
+            _long.capacity = str_size;
+            if ((_long.capacity & 0x01) == 0) _long.capacity++;
+
+            _long.size = str_size;
+            _long.data = new char[_long.capacity + 1];
+            memcpy(_long.data, str, str_size);
         }
 
 

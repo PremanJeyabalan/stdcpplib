@@ -7,21 +7,20 @@
 namespace CustomStd {
     class string {
     public:
-        constexpr string() noexcept {
+        //default constructor
+        string() {
             _short.size_flag = 0;
             _short.buffer[0] = '\0';
         }
 
-
+        //copy constructor
         string(const string& str) {
             const size_t size = str.size();
             if (size <= _short_capacity) copy_short_string(size, str._short.buffer);
             else copy_long_string(size, str._long.data);
         }
 
-//        len = 9
-//        0 - 8, cpy from 2 , max = 2 to 8 = 7 chars
-
+        //substring constructor
         string(const string& str, size_t pos, size_t len = npos) {
             size_t max_len = str.size() - 1 - pos;
             size_t str_size = len == npos || len > max_len ?
@@ -31,23 +30,28 @@ namespace CustomStd {
             else copy_long_string(str_size, str._long.data + pos);
         }
 
+        //from c-string
         string(const char* str) {
             size_t size = strlen(str);
             if (size <= _short_capacity) copy_short_string(size, str);
             else copy_long_string(size, str);
         }
 
+        //from buffer
         string(const char* str, size_t n) {
             size_t size = strlen(str);
 
-            if (n > size || n < 1) throw std::out_of_range("too large");
+            if (n > size || n < 1) throw std::out_of_range("n must be positive and not larger than buffer size");
 
             if (n <= _short_capacity) copy_short_string(n, str);
             else copy_long_string(n, str);
         }
 
+        //fill constructor
         string(size_t n, char c) {
             size_t size = n;
+
+            if (n < 1) throw std::out_of_range("can only fill non empty string");
 
             if (size <= _short_capacity) {
                 _short.size_flag = 0;
@@ -63,6 +67,13 @@ namespace CustomStd {
             memset(ptr(), c, n);
         }
 
+        //initializer list
+        string(std::initializer_list<char> il) {
+            if (il.size() <= _short_capacity) copy_short_string(il.size(), std::begin(il));
+            else copy_long_string(il.size(), std::begin(il));
+        }
+
+        //move constructor
         string(string&& str) noexcept {
             if (str.is_short()) copy_short_string(str.short_size(), str._short.buffer);
             else {

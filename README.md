@@ -7,7 +7,7 @@ Make list of stl containers and functions I want to replicate, or new ones to cr
 
 ### Current List (Tick means in progress/finished)
 - [X] Vector (SBO)
-- [ ] String (SSO)
+- [X] String (SSO)
 - [X] Unique Ptr + Make Unique + Deleter
 - [ ] Shared Ptr + Make Shared + Deleter
 - [ ] Unordered + Ordered Map

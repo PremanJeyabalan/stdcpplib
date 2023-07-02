@@ -22,9 +22,9 @@ namespace CustomStd {
 
         //substring constructor
         string(const string& str, size_t pos, size_t len = npos) {
-            size_t max_len = str.size() - 1 - pos;
+            size_t max_len = str.size() -  pos;
             size_t str_size = len == npos || len > max_len ?
-                max_len : 1 + len;
+                max_len : len;
 
             if (str_size <= _short_capacity) copy_short_string(str_size, str._short.buffer + pos);
             else copy_long_string(str_size, str._long.data + pos);
@@ -39,10 +39,6 @@ namespace CustomStd {
 
         //from buffer
         string(const char* str, size_t n) {
-            size_t size = strlen(str);
-
-            if (n > size || n < 1) throw std::out_of_range("n must be positive and not larger than buffer size");
-
             if (n <= _short_capacity) copy_short_string(n, str);
             else copy_long_string(n, str);
         }
@@ -50,8 +46,6 @@ namespace CustomStd {
         //fill constructor
         string(size_t n, char c) {
             size_t size = n;
-
-            if (n < 1) throw std::out_of_range("can only fill non empty string");
 
             if (size <= _short_capacity) {
                 _short.size_flag = 0;
@@ -68,7 +62,7 @@ namespace CustomStd {
         }
 
         //initializer list
-        string(std::initializer_list<char> il) {
+        explicit string(std::initializer_list<char> il) {
             if (il.size() <= _short_capacity) copy_short_string(il.size(), std::begin(il));
             else copy_long_string(il.size(), std::begin(il));
         }
@@ -136,6 +130,7 @@ namespace CustomStd {
 
         void copy_long_string(size_t str_size, const char* str) {
             _long.capacity = str_size;
+            //prefer to keep odd capacity -> even allocation later.
             if ((_long.capacity & 0x01) == 0) _long.capacity++;
 
             _long.size = str_size;

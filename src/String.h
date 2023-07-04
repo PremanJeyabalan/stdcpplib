@@ -7,6 +7,8 @@
 namespace CustomStd {
     class string {
     public:
+        //CONSTRUCTORS
+
         //default constructor
         string() {
             _short.size_flag = 0;
@@ -69,15 +71,31 @@ namespace CustomStd {
 
         //move constructor
         string(string&& str) noexcept {
-            if (str.is_short()) copy_short_string(str.short_size(), str._short.buffer);
-            else {
+            if (str.is_short()) {
+                copy_short_string(str.short_size(), str._short.buffer);
+                str.set_short_size(0); // consider move efficiency if need to delete here.
+                str._short.buffer[0] = '\0';
+            } else {
                 _long.capacity = str._long.size;
                 if ((_long.capacity & 0x01) == 0) _long.capacity++;
 
                 _long.size = str._long.size;
                 _long.data = str._long.data;
+
                 str._long.data = nullptr;
+                str._short.size_flag = 0;
+                str.set_short_size(0);
+                str._short.buffer[0] = '\0';
             }
+        }
+
+        //ASSIGNMENT OPERATORS
+        string& operator=(const string& str) {
+
+        }
+
+        string& assign(size_t count, char c) {
+
         }
 
         ~string() {

@@ -4,7 +4,6 @@
 #include <gtest/gtest.h>
 #include <String.h>
 
-
 struct StringTestFixture : public testing::Test {
 
 };
@@ -167,4 +166,36 @@ TEST(StringTest, InitListCtorLongValid) {
 
     EXPECT_EQ(k.size(), k_s.size());
     EXPECT_EQ(k.capacity(), k.size() % 2 ? k.size() : k.size() + 1);
+}
+
+TEST(StringTest, MoveCtorShortValid) {
+    CustomStd::string k {"abcdefg"};
+    CustomStd::string k_move {std::move(k)};
+
+    std::string k_s {"abcdefg"};
+    std::string k_s_move {std::move(k_s)};
+
+    EXPECT_EQ(k_move.size(), k_s_move.size());
+    EXPECT_EQ(k_move.capacity(), 22);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 22);
+}
+
+TEST(StringTest, MoveCtorLongValid) {
+    CustomStd::string k ("abcdefghijklmnopqrstuvwxyz");
+    CustomStd::string k_move {std::move(k)};
+
+    std::string k_s ("abcdefghijklmnopqrstuvwxyz");
+    std::string k_s_move {std::move(k_s)};
+
+    EXPECT_EQ(k_move.size(), k_s_move.size());
+    EXPECT_EQ(k_move.capacity(), 27);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 22);
+
+    EXPECT_EQ(k_s, k_s_move) << "Test assign " << k_s_move;
+    k_s_move.assign(5, 'a');
+    EXPECT_EQ(k_s, k_s_move) << "Test assign " << k_s_move;
 }

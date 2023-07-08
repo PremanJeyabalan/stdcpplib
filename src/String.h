@@ -2,7 +2,7 @@
 #define LIB_STRING
 
 #include <cstdlib>
-#include <iostream>
+#include <string.h>
 
 namespace CustomStd {
     class string {
@@ -95,7 +95,57 @@ namespace CustomStd {
         }
 
         string& assign(size_t count, char c) {
+            if (count > capacity()) {
+                short_to_long_housekeeping(count);
+                memset(_long.data, c, count);
+                _long.data[count] = '\0';
+            } else {
+                char* curr_data = ptr();
+                memset(curr_data, c, count);
+                curr_data[count] = '\0';
+                if (is_short()) set_short_size(count);
+                else _long.size = count;
+            }
 
+            return *this;
+        }
+
+        string& assign(const string& str) {
+            const size_t str_size = str.size();
+            if (str_size > capacity()) {
+                short_to_long_housekeeping(str.size());
+                memcpy(_long.data, str.data(), str_size);
+                _long.data[_long.size] = '\0';
+            } else {
+                char* curr_data = ptr();
+                memcpy(curr_data, str.data(), str_size);
+                curr_data[str_size] = '\0';
+                if (is_short()) set_short_size(str_size);
+                else _long.size = str_size;
+            }
+
+            return *this;
+        }
+
+        string& assign(const string& str, size_t pos, size_t count = std::string::npos) {
+            return *this;
+        }
+
+        string& assign(string&& str) noexcept {
+            return *this;
+        }
+
+        string& assign(const char* str, size_t count) {
+           return *this;
+        }
+
+        string& assign(const char* str) {
+            size_t str_size = strlen(str);
+            return assign(str, str_size);
+        }
+
+        string& assign(std::initializer_list<char> ilist) {
+            return *this;
         }
 
         ~string() {
@@ -117,7 +167,9 @@ namespace CustomStd {
         }
 
     private:
-        constexpr bool is_short() const {
+        //short -> LSb = 0
+        //long -> LSb = 1
+        bool is_short() const {
             return !(_short.size_flag & 0x01);
         }
 
@@ -148,7 +200,7 @@ namespace CustomStd {
 
         void copy_long_string(size_t str_size, const char* str) {
             _long.capacity = str_size;
-            //prefer to keep odd capacity -> even allocation later.
+            //must keep odd capacity -> refer to is_short()
             if ((_long.capacity & 0x01) == 0) _long.capacity++;
 
             _long.size = str_size;
@@ -156,12 +208,49 @@ namespace CustomStd {
             memcpy(_long.data, str, str_size);
         }
 
+        void short_to_long_housekeeping(const size_t str_size)  {
+            const bool was_short = is_short();
+            if (!was_short) delete[] _long.data;
+
+            size_t prev_capacity = _long.capacity;
+            _long.capacity = was_short || str_size > 2 * prev_capacity ? str_size
+                    : 2 * prev_capacity;
+
+            if ((_long.capacity & 0x01) == 0) _long.capacity++;
+            _long.size = str_size;
+            _long.data = new char[_long.capacity + 1];
+        }
+
+//        void swap(string& other) noexcept {
+//            const bool this_short = is_short();
+//            const bool other_short = other.is_short();
+//
+//            if (other_short) {
+//                if (!is_short()) delete[] _long.data;
+//                copy_short_string(other.short_size(), other._short.buffer);
+//            }
+//            else {
+//                _long.data = other._long.data;
+//                _long.size = other._long.size;
+//                _long.capacity = other._long.capacity;
+//            }
+//
+//            if (!is_short()) delete[] _long.data;
+//        }
+
 
     private:
+#ifdef LITTLE_ENDIAN
         struct long_t {
             size_t capacity, size;
             char* data;
         };
+#else
+        struct long_t {
+            char* data;
+            size_t size, capacity;
+        };
+#endif
 
         static constexpr size_t _short_capacity = sizeof(long_t) - 2;
         static constexpr size_t npos = -1;

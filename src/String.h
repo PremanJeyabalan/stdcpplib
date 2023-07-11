@@ -96,7 +96,8 @@ namespace CustomStd {
 
         string& assign(size_t count, char c) {
             if (count > capacity()) {
-                short_to_long_housekeeping(count);
+                set_new_long_capacity(count);
+                _long.size = count;
                 memset(_long.data, c, count);
                 _long.data[count] = '\0';
             } else {
@@ -112,30 +113,44 @@ namespace CustomStd {
 
         string& assign(const string& str) {
             const size_t str_size = str.size();
-            if (str_size > capacity()) {
-                short_to_long_housekeeping(str.size());
-                memcpy(_long.data, str.data(), str_size);
-                _long.data[_long.size] = '\0';
-            } else {
-                char* curr_data = ptr();
-                memcpy(curr_data, str.data(), str_size);
-                curr_data[str_size] = '\0';
-                if (is_short()) set_short_size(str_size);
-                else _long.size = str_size;
+
+            if (str_size > capacity()) alloc_new_long_string(str_size, str.data());
+            else replace_curr_string(str.size(), str.data());
+
+            return *this;
+        }
+
+        string& assign(const string& str, size_t pos, size_t count = npos) {
+            if (pos > str.size()) throw std::out_of_range("pos invalid");
+
+            const size_t str_size = std::min(str.size() - pos + 1, count+1);
+
+            if (str_size > capacity()) alloc_new_long_string(str_size, str.data() + pos);
+            else replace_curr_string(str_size, str.data() + pos);
+
+            return *this;
+        }
+
+        string& assign(string&& str) noexcept {
+            if (str.is_short()) copy_short_string(str.short_size(), str._short.buffer);
+            else {
+                if (!is_short()) delete[] _long.data;
+
+                _long.capacity = str._long.capacity;
+                _long.size = str._long.size;
+                _long.data = str._long.data;
+                str._long.data = nullptr;
             }
 
             return *this;
         }
 
-        string& assign(const string& str, size_t pos, size_t count = std::string::npos) {
-            return *this;
-        }
-
-        string& assign(string&& str) noexcept {
-            return *this;
-        }
-
         string& assign(const char* str, size_t count) {
+           size_t str_size = std::min(strlen(str), count);
+
+           if (str_size > capacity()) alloc_new_long_string(str_size, str);
+           else replace_curr_string(str_size, str);
+
            return *this;
         }
 
@@ -145,6 +160,9 @@ namespace CustomStd {
         }
 
         string& assign(std::initializer_list<char> ilist) {
+            if (ilist.size() > capacity()) alloc_new_long_string(ilist.size(), std::begin(ilist));
+            else replace_curr_string(ilist.size(), std::begin(ilist));
+
             return *this;
         }
 
@@ -198,27 +216,38 @@ namespace CustomStd {
             memcpy(_short.buffer, str, str_size);
         }
 
-        void copy_long_string(size_t str_size, const char* str) {
-            _long.capacity = str_size;
+        void copy_long_string(size_t str_size, const char* str, size_t capacity = npos) {
+            _long.capacity = capacity == npos ? str_size
+                    : capacity;
             //must keep odd capacity -> refer to is_short()
             if ((_long.capacity & 0x01) == 0) _long.capacity++;
 
             _long.size = str_size;
             _long.data = new char[_long.capacity + 1];
             memcpy(_long.data, str, str_size);
+            _long.data[_long.size] = '\0';
         }
 
-        void short_to_long_housekeeping(const size_t str_size)  {
+        void set_new_long_capacity(const size_t str_size) {
             const bool was_short = is_short();
             if (!was_short) delete[] _long.data;
 
             size_t prev_capacity = _long.capacity;
             _long.capacity = was_short || str_size > 2 * prev_capacity ? str_size
                     : 2 * prev_capacity;
+        }
 
-            if ((_long.capacity & 0x01) == 0) _long.capacity++;
-            _long.size = str_size;
-            _long.data = new char[_long.capacity + 1];
+        void alloc_new_long_string(const size_t str_size, const char* src)  {
+            set_new_long_capacity(str_size);
+            copy_long_string(str_size, src, _long.capacity);
+        }
+
+        void replace_curr_string(const size_t str_size, const char* src) {
+            char* curr_data = ptr();
+            memcpy(curr_data, src, str_size);
+            curr_data[str_size] = '\0';
+            if (is_short()) set_short_size(str_size);
+            else _long.size = str_size;
         }
 
 //        void swap(string& other) noexcept {

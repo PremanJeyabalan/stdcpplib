@@ -91,13 +91,15 @@ namespace CustomStd {
 
         //ASSIGNMENT OPERATORS
         string& operator=(const string& str) {
-
+            assign(str);
+            return *this;
         }
 
         string& assign(size_t count, char c) {
             if (count > capacity()) {
                 set_new_long_capacity(count);
                 _long.size = count;
+                _long.data = new char[_long.capacity + 1];
                 memset(_long.data, c, count);
                 _long.data[count] = '\0';
             } else {
@@ -123,7 +125,7 @@ namespace CustomStd {
         string& assign(const string& str, size_t pos, size_t count = npos) {
             if (pos > str.size()) throw std::out_of_range("pos invalid");
 
-            const size_t str_size = std::min(str.size() - pos + 1, count+1);
+            const size_t str_size = std::min(str.size() - pos, count);
 
             if (str_size > capacity()) alloc_new_long_string(str_size, str.data() + pos);
             else replace_curr_string(str_size, str.data() + pos);
@@ -235,6 +237,8 @@ namespace CustomStd {
             size_t prev_capacity = _long.capacity;
             _long.capacity = was_short || str_size > 2 * prev_capacity ? str_size
                     : 2 * prev_capacity;
+
+            if ((_long.capacity & 0x01) == 0) _long.capacity++;
         }
 
         void alloc_new_long_string(const size_t str_size, const char* src)  {

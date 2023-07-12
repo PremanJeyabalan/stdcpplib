@@ -325,3 +325,39 @@ TEST(StringTest, AssignFromStrShortToLongValid) {
     EXPECT_EQ(k.size(), k_s.size());
     EXPECT_EQ(k.capacity(), 25);
 }
+
+TEST(StringTest, AssignFromStrWithPosCountLongValid) {
+
+
+    //copy from within range (small and long), then try out of range, and with no param
+    CustomStd::string k ("abcdefghijklmnopqrstuvwxyz");
+    auto l = CustomStd::string(25, 'c');
+    auto old_cap = k.capacity();
+    k.assign(l, 1, 2);
+
+
+    std::string k_s ("abcdefghijklmnopqrstuvwxyz");
+    auto l_s = std::string(25, 'c');
+    k_s.assign(l_s, 1, 2);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap);
+
+    k.assign(l, 1, 24);
+    k_s.assign(l_s, 1, 24);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap);
+
+    k.assign(l, 1,  50);
+    k_s.assign(l_s, 1, 50);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap);
+
+    k.assign(l, 1);
+    k_s.assign(l_s, 1);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap);
+}

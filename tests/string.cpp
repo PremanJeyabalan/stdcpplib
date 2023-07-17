@@ -542,3 +542,56 @@ TEST(StringTest, AssignFromInitListShortValid) {
     EXPECT_EQ(k.size(), k_s.size());
     EXPECT_EQ(k.capacity(), 29);
 }
+
+TEST(StringTest, ReserveFromShortToShort) {
+    CustomStd::string k (12, 'd');
+
+    k.reserve(14);
+
+    EXPECT_EQ(22, k.capacity());
+    EXPECT_EQ(12, k.size());
+
+    k.reserve();
+
+    EXPECT_EQ(22, k.capacity());
+    EXPECT_EQ(12, k.size());
+}
+
+TEST(StringTest, ReserveFromShortToLong) {
+    CustomStd::string k(12, 'd');
+    k.reserve(30);
+    EXPECT_EQ(31, k.capacity());
+    EXPECT_EQ(12, k.size());
+}
+
+TEST(StringTest, ReserveFromLongToLong) {
+    CustomStd::string k(30, 'c');
+    k.reserve(60);
+    EXPECT_EQ(61, k.capacity());
+    EXPECT_EQ(30, k.size());
+
+    k.reserve();
+    EXPECT_EQ(31, k.capacity());
+    EXPECT_EQ(30, k.size());
+}
+
+TEST(StringTest, ClearFromShort) {
+    CustomStd::string k(3, 'c');
+    k.clear();
+    EXPECT_EQ(k.size(), 0);
+    EXPECT_EQ(k.capacity(), 22);
+}
+
+TEST(StringTest, ClearFromLong) {
+    CustomStd::string k(30, 'c');
+    k.clear();
+    EXPECT_EQ(k.size(), 0);
+    EXPECT_EQ(k.capacity(), 31);
+}
+
+TEST(StringTest, InsertFillFromShort) {
+    CustomStd::string k(5, 'd');
+    k.insert(2, 2, 'e');
+    EXPECT_EQ(k.size(), 7);
+    EXPECT_TRUE(k == CustomStd::string("ddeeddd"));
+}

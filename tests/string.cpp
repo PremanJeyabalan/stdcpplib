@@ -319,16 +319,14 @@ TEST(StringTest, AssignFromStrShortToLongValid) {
     auto l = CustomStd::string(5, 'd');
     auto l_s = std::string(5, 'd');
 
-    k.assign(5, 'd');
-    k_s.assign(5, 'd');
+    k.assign(l);
+    k_s.assign(l_s);
 
     EXPECT_EQ(k.size(), k_s.size());
     EXPECT_EQ(k.capacity(), 25);
 }
 
 TEST(StringTest, AssignFromStrWithPosCountLongValid) {
-
-
     //copy from within range (small and long), then try out of range, and with no param
     CustomStd::string k ("abcdefghijklmnopqrstuvwxyz");
     auto l = CustomStd::string(25, 'c');
@@ -360,4 +358,187 @@ TEST(StringTest, AssignFromStrWithPosCountLongValid) {
 
     EXPECT_EQ(k.size(), k_s.size());
     EXPECT_EQ(k.capacity(), old_cap);
+}
+
+TEST(StringTest, AssignFromStrWithPosCountShortValid) {
+    //copy from within range (small), then try out of range, and with no param
+    CustomStd::string k ("abcdefg");
+    auto l = CustomStd::string(25, 'c');
+    auto old_cap = k.capacity();
+    k.assign(l, 1, 2);
+
+
+    std::string k_s ("abcdefg");
+    auto l_s = std::string(25, 'c');
+    k_s.assign(l_s, 1, 2);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap);
+
+    k.assign(l, 1, 24);
+    k_s.assign(l_s, 1, 24);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 25);
+
+    k.assign(l, 1,  50);
+    k_s.assign(l_s, 1, 50);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 25);
+
+    k.assign(l, 1);
+    k_s.assign(l_s, 1);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 25);
+}
+
+TEST(StringTest, AssignFromMovedStrShortValid) {
+    CustomStd::string k ("abcdefg");
+    CustomStd::string l ("abc");
+    CustomStd::string m ("abcdefghi");
+
+    std::string k_s ("abcdefg");
+    std::string l_s ("abc");
+    std::string m_s ("abcdefghi");
+
+    auto old_cap_l = l.capacity();
+
+    k.assign(std::move(l));
+    k_s.assign(std::move(l_s));
+
+    ASSERT_EQ(k.size(), k_s.size());
+    ASSERT_EQ(k.capacity(), old_cap_l);
+
+    auto old_cap_m = m.capacity();
+
+    k.assign(std::move(m));
+    k_s.assign(std::move(m_s));
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap_m);
+}
+
+TEST(StringTest, AssignFromMovedStrLongValid) {
+    CustomStd::string k ("abcdefghijklmnopqrstuvwxyz");
+    auto l = CustomStd::string(24, 'c');
+    auto m = CustomStd::string(40, 'd');
+    auto old_cap_l = l.capacity();
+    k.assign(std::move(l));
+
+    std::string k_s ("abcdefghijklmnopqrstuvwxyz");
+    auto l_s = std::string(24, 'c');
+    auto m_s = std::string(40, 'd');
+    k_s.assign(std::move(l_s));
+
+    ASSERT_EQ(k.size(), k_s.size());
+    ASSERT_EQ(k.capacity(), old_cap_l);
+
+    auto old_cap_m = m.capacity();
+
+    k.assign(std::move(m));
+    k_s.assign(std::move(m_s));
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(old_cap_m, k.capacity());
+
+    auto test = CustomStd::string(30, 'c');
+    auto test_s = std::string (30, 'c');
+
+    auto old_cap_test = test.capacity();
+
+    k.assign(std::move(test));
+    k_s.assign(std::move(test_s));
+
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(old_cap_test, k.capacity());
+}
+
+TEST(StringTest, AssignFromMovedStrShortToLongValid) {
+    CustomStd::string k ("abcdefg");
+    auto m = CustomStd::string(24, 'c');
+    auto old_cap_m = m.capacity();
+    k.assign(std::move(m));
+
+    std::string k_s ("abcdefg");
+    auto m_s = std::string(24, 'c');
+    k_s.assign(std::move(m_s));
+
+    ASSERT_EQ(k.size(), k_s.size());
+    ASSERT_EQ(k.capacity(), old_cap_m);
+
+    auto l = CustomStd::string(5, 'd');
+    auto l_s = std::string(5, 'd');
+
+    auto old_cap_l = l.capacity();
+
+    k.assign(std::move(l));
+    k_s.assign(std::move(l_s));
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), old_cap_l);
+}
+
+TEST(StringTest, AssignFromCharsWithCountShortValid) {
+    CustomStd::string k (4, 'd');
+    k.assign("abcd", 1);
+
+    std::string k_s (4, 'd');
+    k_s.assign("abcd", 1);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 22);
+
+    k.assign("abcdefghijklmnopqrstuvwxyz", 24);
+    k_s.assign("abcdefghijklmnopqrstuvwxyz", 24);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 25);
+
+    k.assign("abcdefghijklmnopqrstuvwxyz", 29);
+    k_s.assign("abcdefghijklmnopqrstuvwxyz", 29);
+
+    EXPECT_EQ(k.size(), 26);
+    EXPECT_EQ(k.capacity(), 25 * 2 + 1);
+}
+
+TEST(StringTest, AssignFromCharsWithCountLongValid) {
+    CustomStd::string k (23, 'd');
+    k.assign("abcd", 1);
+
+    std::string k_s (23, 'd');
+    k_s.assign("abcd", 1);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 23);
+
+    k.assign("abcdefghijklmnopqrstuvwxyz", 26);
+    k_s.assign("abcdefghijklmnopqrstuvwxyz", 26);
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 23 * 2 + 1);
+}
+
+TEST(StringTest, AssignFromInitListShortValid) {
+    CustomStd::string k (4, 'd');
+    k.assign(std::initializer_list<char> {'a'});
+
+    std::string k_s (4, 'd');
+    k_s.assign(std::initializer_list<char> {'a'});
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 22);
+
+    k.assign(std::initializer_list<char> {'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a'});
+    k_s.assign(std::initializer_list<char> {'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 'a', 'a'});
+
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 29);
+
+    k.assign(std::initializer_list<char> {'a'});
+    k_s.assign(std::initializer_list<char> {'a'});
+    EXPECT_EQ(k.size(), k_s.size());
+    EXPECT_EQ(k.capacity(), 29);
 }

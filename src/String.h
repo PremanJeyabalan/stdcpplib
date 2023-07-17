@@ -89,11 +89,38 @@ namespace CustomStd {
             }
         }
 
+        ~string() {
+            if (!is_short()) delete[] _long.data;
+        }
+
         //ASSIGNMENT OPERATORS
         string& operator=(const string& str) {
+            if (this == &str) return *this;
             assign(str);
             return *this;
         }
+
+        string& operator=(string&& str) noexcept {
+            assign(std::move(str));
+            return *this;
+        }
+
+        string& operator=(const char* str) {
+            assign(str);
+            return *this;
+        }
+
+        string& operator=(char t) {
+            assign(1, t);
+            return  *this;
+        }
+
+        string& operator=(std::initializer_list<char> ilist) {
+            assign(ilist);
+            return *this;
+        }
+
+        //ASSIGN
 
         string& assign(size_t count, char c) {
             if (count > capacity()) {
@@ -142,6 +169,8 @@ namespace CustomStd {
                 _long.size = str._long.size;
                 _long.data = str._long.data;
                 str._long.data = nullptr;
+                str._long.size = 0;
+                str._long.capacity = 0;
             }
 
             return *this;
@@ -168,23 +197,79 @@ namespace CustomStd {
             return *this;
         }
 
-        ~string() {
-            if (!is_short()) delete[] _long.data;
+        //ELEMENT ACCESS
+
+        char& at(size_t pos) {
+            if (pos >= size()) throw std::out_of_range("invalid pos");
+
+            return *(ptr() + pos);
+        }
+
+        const char& at(size_t pos) const {
+            if (pos >= size()) throw std::out_of_range("invalid pos");
+
+            return *(ptr() + pos);
+        }
+
+        char& operator[](size_t pos) {
+            return *(ptr() + pos);
+        }
+
+        const char& operator[](size_t pos) const {
+            return *(ptr() + pos);
+        }
+
+        char& front() {
+            return operator[](0);
+        }
+
+        const char& front() const {
+            return operator[](0);
+        }
+
+        const char* data() const noexcept {
+            return ptr();
+        }
+
+        char* data() noexcept {
+            return ptr();
+        }
+
+        const char* c_str() const noexcept {
+            return data();
+        }
+
+        char& back() {
+            return operator[](size() - 1);
+        }
+
+        const char& back() const {
+            return operator[](size() - 1);
+        }
+
+//      CAPACITY
+        bool empty() const noexcept {
+            return size() > 0;
         }
 
         size_t capacity() {
             return is_short() ?
-                _short_capacity : _long.capacity;
+                   _short_capacity : _long.capacity;
         }
 
-        size_t size() const {
+        size_t size() const noexcept {
             return is_short() ?
-                short_size() : _long.size;
+                   short_size() : _long.size;
         }
 
-        const char* data() const {
-            return ptr();
+        size_t length() const noexcept {
+            return size();
         }
+
+        void reserve(size_t new_cap = 0) {
+
+        }
+
 
     private:
         //short -> LSb = 0

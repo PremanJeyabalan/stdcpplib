@@ -267,9 +267,79 @@ namespace CustomStd {
         }
 
         void reserve(size_t new_cap = 0) {
-
+            if (new_cap > capacity()) long_reserve(new_cap);
+            else shrink_to_fit();
         }
 
+        void shrink_to_fit() {
+            if (is_short() || _long.capacity == _long.size) return;
+
+            _long.capacity = _long.size;
+            if ((_long.capacity & 0x01) == 0) _long.capacity++;
+
+            char* new_data = new char[_long.capacity+1];
+            memcpy(new_data, _long.data, _long.size);
+            delete[] _long.data;
+            _long.data = new_data;
+            _long.data[_long.size] = '\0';
+        }
+
+//      OPERATIONS
+
+        void clear() noexcept {
+            if (is_short()) {
+                set_short_size(0);
+                _short.buffer[0] = '\0';
+            } else {
+                _long.size = 0;
+                _long.data[0] = '\0';
+            }
+        }
+
+        string& insert(size_t index, size_t count, char c) {
+            const size_t curr_size = size();
+            if (index > curr_size) throw std::out_of_range("invalid index");
+
+            size_t new_size = curr_size + count;
+            if (new_size > capacity()) long_reserve(new_size);
+
+            memcpy(ptr() + curr_size, ptr() + index, count);
+            memset(ptr() + index, c, count);
+
+            if (is_short()) set_short_size(new_size);
+            else _long.size = new_size;
+
+            return *this;
+        }
+
+        string& insert(size_t index, const char* str) {
+            return *this;
+        }
+
+        string& insert(size_t index, const char* str, size_t count) {
+            return *this;
+        }
+
+        string& insert(size_t index, const string& str) {
+            return *this;
+        }
+
+        string& insert(size_t index, const string& str, size_t s_index, size_t count = npos) {
+            return *this;
+        }
+
+        bool operator==(const string& rhs) noexcept {
+            if (size() != rhs.size()) return false;
+
+            const char* lhs_str = c_str();
+            const char* rhs_str = rhs.c_str();
+
+            for (int i = 0; i < size(); i++) {
+                if (lhs_str[i] != rhs_str[i]) return false;
+            }
+
+            return true;
+        }
 
     private:
         //short -> LSb = 0
@@ -294,6 +364,20 @@ namespace CustomStd {
         const char* ptr() const {
             return is_short() ?
                 _short.buffer : _long.data;
+        }
+
+        void long_reserve(size_t new_cap) {
+            const bool was_short = is_short();
+            const char* curr_data = ptr();
+            _long.size = size();
+            _long.capacity = new_cap;
+            if ((_long.capacity & 0x01) == 0) _long.capacity++;
+
+            char* new_data = new char[_long.capacity + 1];
+            memcpy(new_data, curr_data, _long.size);
+
+            if (!was_short) delete[] _long.data;
+            _long.data = new_data;
         }
 
         void copy_short_string(size_t str_size, const char* str) {

@@ -593,5 +593,41 @@ TEST(StringTest, InsertFillFromShort) {
     CustomStd::string k(5, 'd');
     k.insert(2, 2, 'e');
     EXPECT_EQ(k.size(), 7);
-    EXPECT_TRUE(k == CustomStd::string("ddeeddd"));
+    EXPECT_TRUE(k == "ddeeddd");
+
+    k.insert(k.size(), 2, 'e');
+    EXPECT_EQ(k.size(), 9);
+    EXPECT_TRUE(k == "ddeedddee");
+
+}
+TEST(StringTest, InsertFillFromLong) {
+    CustomStd::string k(26, 'd');
+    k.insert(0, 2, 'e');
+    EXPECT_EQ(k.size(), 28);
+    EXPECT_TRUE(k == "eedddddddddddddddddddddddddd");
+
+    k.insert(k.size(), 2, 'e');
+    EXPECT_EQ(k.size(), 30);
+    EXPECT_TRUE(k == "eeddddddddddddddddddddddddddee");
+}
+
+TEST(StringTest, InsertFillShortToLong) {
+    CustomStd::string k(20, 'd');
+    k.insert(0, 4, 'e');
+    CustomStd::string b ("eeeedddddddddddddddddddd");
+    EXPECT_EQ(k.size(), b.size());
+    EXPECT_EQ(k.capacity(), b.capacity());
+
+    EXPECT_TRUE(k == b);
+}
+
+TEST(StringTest, InsertCharsFromShort) {
+    CustomStd::string k(5, 'd');
+    k.insert(0, "abc");
+    EXPECT_EQ(k.size(), 8);
+    EXPECT_TRUE(k == "abcddddd");
+
+    k.insert(1, "d");
+    EXPECT_EQ(k.size(), 9);
+    EXPECT_TRUE(k == "adbcddddd") << std::string(k.c_str());
 }

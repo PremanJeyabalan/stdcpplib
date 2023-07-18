@@ -303,7 +303,7 @@ namespace CustomStd {
             size_t new_size = curr_size + count;
             if (new_size > capacity()) long_reserve(new_size);
 
-            memcpy(ptr() + curr_size, ptr() + index, count);
+            if (index < curr_size) memcpy(ptr() + curr_size, ptr() + index, curr_size - index);
             memset(ptr() + index, c, count);
 
             if (is_short()) set_short_size(new_size);
@@ -313,6 +313,19 @@ namespace CustomStd {
         }
 
         string& insert(size_t index, const char* str) {
+            const size_t str_size = strlen(str);
+            const size_t curr_size = size();
+            if (index > curr_size) throw std::out_of_range("invalid index");
+
+            size_t new_size = curr_size + str_size;
+            if (new_size > capacity())long_reserve(new_size);
+
+            if (index < curr_size) memcpy(ptr() + curr_size, ptr() + index, str_size);
+            memcpy(ptr() + index, str, str_size);
+
+            if (is_short()) set_short_size(new_size);
+            else _long.size = new_size;
+
             return *this;
         }
 
@@ -328,7 +341,7 @@ namespace CustomStd {
             return *this;
         }
 
-        bool operator==(const string& rhs) noexcept {
+        bool operator==(const string& rhs) const noexcept {
             if (size() != rhs.size()) return false;
 
             const char* lhs_str = c_str();
@@ -369,14 +382,16 @@ namespace CustomStd {
         void long_reserve(size_t new_cap) {
             const bool was_short = is_short();
             const char* curr_data = ptr();
-            _long.size = size();
-            _long.capacity = new_cap;
-            if ((_long.capacity & 0x01) == 0) _long.capacity++;
+            const size_t curr_size = size();
+            if ((new_cap & 0x01) == 0) new_cap++;
 
-            char* new_data = new char[_long.capacity + 1];
-            memcpy(new_data, curr_data, _long.size);
+            char* new_data = new char[new_cap + 1];
+            memcpy(new_data, curr_data, curr_size);
+            new_data[curr_size] = '\0';
 
             if (!was_short) delete[] _long.data;
+            _long.size = curr_size;
+            _long.capacity = new_cap;
             _long.data = new_data;
         }
 

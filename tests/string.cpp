@@ -631,3 +631,11 @@ TEST(StringTest, InsertCharsFromShort) {
     EXPECT_EQ(k.size(), 9);
     EXPECT_TRUE(k == "adbcddddd") << std::string(k.c_str());
 }
+
+TEST(StringTest, InsertCharsFromStr) {
+    CustomStd::string k(5, 'd');
+    CustomStd::string k_2 (1, 'e');
+    k.insert(1, k_2);
+    EXPECT_EQ(k.size(), 6);
+    EXPECT_TRUE(k == "dedddd") << std::string(k.c_str());
+}

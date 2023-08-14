@@ -16,31 +16,31 @@ namespace CustomStd {
         }
 
         //copy constructor
-        string(const string& str) {
+        string(const string &str) {
             const size_t size = str.size();
             if (size <= _short_capacity) copy_short_string(size, str._short.buffer);
             else copy_long_string(size, str._long.data);
         }
 
         //substring constructor
-        string(const string& str, size_t pos, size_t len = npos) {
-            size_t max_len = str.size() -  pos;
+        string(const string &str, size_t pos, size_t len = npos) {
+            size_t max_len = str.size() - pos;
             size_t str_size = len == npos || len > max_len ?
-                max_len : len;
+                              max_len : len;
 
             if (str_size <= _short_capacity) copy_short_string(str_size, str._short.buffer + pos);
             else copy_long_string(str_size, str._long.data + pos);
         }
 
         //from c-string
-        string(const char* str) {
+        string(const char *str) {
             size_t size = strlen(str);
             if (size <= _short_capacity) copy_short_string(size, str);
             else copy_long_string(size, str);
         }
 
         //from buffer
-        string(const char* str, size_t n) {
+        string(const char *str, size_t n) {
             if (n <= _short_capacity) copy_short_string(n, str);
             else copy_long_string(n, str);
         }
@@ -70,7 +70,7 @@ namespace CustomStd {
         }
 
         //move constructor
-        string(string&& str) noexcept {
+        string(string &&str) noexcept {
             if (str.is_short()) {
                 copy_short_string(str.short_size(), str._short.buffer);
                 str.set_short_size(0); // consider move efficiency if need to delete here.
@@ -94,35 +94,35 @@ namespace CustomStd {
         }
 
         //ASSIGNMENT OPERATORS
-        string& operator=(const string& str) {
+        string &operator=(const string &str) {
             if (this == &str) return *this;
             assign(str);
             return *this;
         }
 
-        string& operator=(string&& str) noexcept {
+        string &operator=(string &&str) noexcept {
             assign(std::move(str));
             return *this;
         }
 
-        string& operator=(const char* str) {
+        string &operator=(const char *str) {
             assign(str);
             return *this;
         }
 
-        string& operator=(char t) {
+        string &operator=(char t) {
             assign(1, t);
-            return  *this;
+            return *this;
         }
 
-        string& operator=(std::initializer_list<char> ilist) {
+        string &operator=(std::initializer_list<char> ilist) {
             assign(ilist);
             return *this;
         }
 
         //ASSIGN
 
-        string& assign(size_t count, char c) {
+        string &assign(size_t count, char c) {
             if (count > capacity()) {
                 set_new_long_capacity(count);
                 _long.size = count;
@@ -130,7 +130,7 @@ namespace CustomStd {
                 memset(_long.data, c, count);
                 _long.data[count] = '\0';
             } else {
-                char* curr_data = ptr();
+                char *curr_data = ptr();
                 memset(curr_data, c, count);
                 curr_data[count] = '\0';
                 if (is_short()) set_short_size(count);
@@ -140,7 +140,7 @@ namespace CustomStd {
             return *this;
         }
 
-        string& assign(const string& str) {
+        string &assign(const string &str) {
             const size_t str_size = str.size();
 
             if (str_size > capacity()) alloc_new_long_string(str_size, str.data());
@@ -149,7 +149,7 @@ namespace CustomStd {
             return *this;
         }
 
-        string& assign(const string& str, size_t pos, size_t count = npos) {
+        string &assign(const string &str, size_t pos, size_t count = npos) {
             if (pos > str.size()) throw std::out_of_range("pos invalid");
 
             const size_t str_size = std::min(str.size() - pos, count);
@@ -160,7 +160,7 @@ namespace CustomStd {
             return *this;
         }
 
-        string& assign(string&& str) noexcept {
+        string &assign(string &&str) noexcept {
             if (str.is_short()) copy_short_string(str.short_size(), str._short.buffer);
             else {
                 if (!is_short()) delete[] _long.data;
@@ -176,21 +176,21 @@ namespace CustomStd {
             return *this;
         }
 
-        string& assign(const char* str, size_t count) {
-           size_t str_size = std::min(strlen(str), count);
+        string &assign(const char *str, size_t count) {
+            size_t str_size = std::min(strlen(str), count);
 
-           if (str_size > capacity()) alloc_new_long_string(str_size, str);
-           else replace_curr_string(str_size, str);
+            if (str_size > capacity()) alloc_new_long_string(str_size, str);
+            else replace_curr_string(str_size, str);
 
-           return *this;
+            return *this;
         }
 
-        string& assign(const char* str) {
+        string &assign(const char *str) {
             size_t str_size = strlen(str);
             return assign(str, str_size);
         }
 
-        string& assign(std::initializer_list<char> ilist) {
+        string &assign(std::initializer_list<char> ilist) {
             if (ilist.size() > capacity()) alloc_new_long_string(ilist.size(), std::begin(ilist));
             else replace_curr_string(ilist.size(), std::begin(ilist));
 
@@ -199,51 +199,51 @@ namespace CustomStd {
 
         //ELEMENT ACCESS
 
-        char& at(size_t pos) {
+        char &at(size_t pos) {
             if (pos >= size()) throw std::out_of_range("invalid pos");
 
             return *(ptr() + pos);
         }
 
-        const char& at(size_t pos) const {
+        const char &at(size_t pos) const {
             if (pos >= size()) throw std::out_of_range("invalid pos");
 
             return *(ptr() + pos);
         }
 
-        char& operator[](size_t pos) {
+        char &operator[](size_t pos) {
             return *(ptr() + pos);
         }
 
-        const char& operator[](size_t pos) const {
+        const char &operator[](size_t pos) const {
             return *(ptr() + pos);
         }
 
-        char& front() {
+        char &front() {
             return operator[](0);
         }
 
-        const char& front() const {
+        const char &front() const {
             return operator[](0);
         }
 
-        const char* data() const noexcept {
+        const char *data() const noexcept {
             return ptr();
         }
 
-        char* data() noexcept {
+        char *data() noexcept {
             return ptr();
         }
 
-        const char* c_str() const noexcept {
+        const char *c_str() const noexcept {
             return data();
         }
 
-        char& back() {
+        char &back() {
             return operator[](size() - 1);
         }
 
-        const char& back() const {
+        const char &back() const {
             return operator[](size() - 1);
         }
 
@@ -277,7 +277,7 @@ namespace CustomStd {
             _long.capacity = _long.size;
             if ((_long.capacity & 0x01) == 0) _long.capacity++;
 
-            char* new_data = new char[_long.capacity+1];
+            char *new_data = new char[_long.capacity + 1];
             memcpy(new_data, _long.data, _long.size);
             delete[] _long.data;
             _long.data = new_data;
@@ -296,7 +296,7 @@ namespace CustomStd {
             }
         }
 
-        string& insert(size_t index, size_t count, char c) {
+        string &insert(size_t index, size_t count, char c) {
             const size_t curr_size = size();
             if (index > curr_size) throw std::out_of_range("invalid index");
 
@@ -312,15 +312,26 @@ namespace CustomStd {
             return *this;
         }
 
-        string& insert(size_t index, const char* str) {
+        string &insert(size_t index, const char *str) {
             const size_t str_size = strlen(str);
+            this->insert(index, str, str_size);
+            return *this;
+        }
+
+        string &insert(size_t index, const char *str, size_t count) {
+            const size_t str_size = std::min(count, strlen(str));
+
             const size_t curr_size = size();
             if (index > curr_size) throw std::out_of_range("invalid index");
 
             size_t new_size = curr_size + str_size;
-            if (new_size > capacity())long_reserve(new_size);
+            if (new_size > capacity()) long_reserve(new_size);
 
-            if (index < curr_size) memcpy(ptr() + curr_size, ptr() + index, str_size);
+            if (index < curr_size) {
+                char *ptr_used = ptr();
+                for (int i = curr_size - 1; i >= static_cast<int>(index); i--) ptr_used[i + str_size] = ptr_used[i];
+            }
+
             memcpy(ptr() + index, str, str_size);
 
             if (is_short()) set_short_size(new_size);
@@ -329,23 +340,28 @@ namespace CustomStd {
             return *this;
         }
 
-        string& insert(size_t index, const char* str, size_t count) {
+        string &insert(size_t index, const string &str) {
+            const size_t str_size = size();
+            this->insert(index, str.ptr(),str_size);
             return *this;
         }
 
-        string& insert(size_t index, const string& str) {
+        string &insert(size_t index, const string &str, size_t s_index, size_t count = npos) {
+            this->insert(index, str.substr(s_index, count));
             return *this;
         }
 
-        string& insert(size_t index, const string& str, size_t s_index, size_t count = npos) {
-            return *this;
+        string substr( size_t pos = 0, size_t count = npos ) const {
+            if (pos > size()) throw std::out_of_range("out of range");
+
+            return string{*this, pos, count};
         }
 
-        bool operator==(const string& rhs) const noexcept {
+        bool operator==(const string &rhs) const noexcept {
             if (size() != rhs.size()) return false;
 
-            const char* lhs_str = c_str();
-            const char* rhs_str = rhs.c_str();
+            const char *lhs_str = c_str();
+            const char *rhs_str = rhs.c_str();
 
             for (int i = 0; i < size(); i++) {
                 if (lhs_str[i] != rhs_str[i]) return false;
@@ -354,6 +370,7 @@ namespace CustomStd {
             return true;
         }
 
+
     private:
         //short -> LSb = 0
         //long -> LSb = 1
@@ -361,7 +378,7 @@ namespace CustomStd {
             return !(_short.size_flag & 0x01);
         }
 
-         size_t short_size() const {
+        size_t short_size() const {
             return _short.size_flag >> 1;
         }
 
@@ -369,23 +386,23 @@ namespace CustomStd {
             _short.size_flag = n << 1;
         }
 
-        char* ptr() {
+        char *ptr() {
             return is_short() ?
-                _short.buffer : _long.data;
+                   _short.buffer : _long.data;
         }
 
-        const char* ptr() const {
+        const char *ptr() const {
             return is_short() ?
-                _short.buffer : _long.data;
+                   _short.buffer : _long.data;
         }
 
         void long_reserve(size_t new_cap) {
             const bool was_short = is_short();
-            const char* curr_data = ptr();
+            const char *curr_data = ptr();
             const size_t curr_size = size();
             if ((new_cap & 0x01) == 0) new_cap++;
 
-            char* new_data = new char[new_cap + 1];
+            char *new_data = new char[new_cap + 1];
             memcpy(new_data, curr_data, curr_size);
             new_data[curr_size] = '\0';
 
@@ -395,16 +412,16 @@ namespace CustomStd {
             _long.data = new_data;
         }
 
-        void copy_short_string(size_t str_size, const char* str) {
+        void copy_short_string(size_t str_size, const char *str) {
             _short.size_flag = 0;
             set_short_size(str_size);
 
             memcpy(_short.buffer, str, str_size);
         }
 
-        void copy_long_string(size_t str_size, const char* str, size_t capacity = npos) {
+        void copy_long_string(size_t str_size, const char *str, size_t capacity = npos) {
             _long.capacity = capacity == npos ? str_size
-                    : capacity;
+                                              : capacity;
             //must keep odd capacity -> refer to is_short()
             if ((_long.capacity & 0x01) == 0) _long.capacity++;
 
@@ -420,23 +437,33 @@ namespace CustomStd {
 
             size_t prev_capacity = _long.capacity;
             _long.capacity = was_short || str_size > 2 * prev_capacity ? str_size
-                    : 2 * prev_capacity;
+                                                                       : 2 * prev_capacity;
 
             if ((_long.capacity & 0x01) == 0) _long.capacity++;
         }
 
-        void alloc_new_long_string(const size_t str_size, const char* src)  {
+        void alloc_new_long_string(const size_t str_size, const char *src) {
             set_new_long_capacity(str_size);
             copy_long_string(str_size, src, _long.capacity);
         }
 
-        void replace_curr_string(const size_t str_size, const char* src) {
-            char* curr_data = ptr();
+        void replace_curr_string(const size_t str_size, const char *src) {
+            char *curr_data = ptr();
             memcpy(curr_data, src, str_size);
             curr_data[str_size] = '\0';
             if (is_short()) set_short_size(str_size);
             else _long.size = str_size;
         }
+
+        void print() {
+            std::cout << "[";
+            int i = 0;
+            for (; i < size() - 1; i++) {
+                std::cout << *(ptr() + i) << ", ";
+            }
+            std::cout << *(ptr() + i) << "]" << std::endl;
+        }
+
 
 //        void swap(string& other) noexcept {
 //            const bool this_short = is_short();

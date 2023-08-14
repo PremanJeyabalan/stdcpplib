@@ -9,13 +9,8 @@ Make list of stl containers and functions I want to replicate, or new ones to cr
 - [X] Vector (SBO)
 - [X] String (SSO)
 - [X] Unique Ptr + Make Unique + Deleter
-- [ ] Shared Ptr + Make Shared + Deleter
 - [ ] Unordered + Ordered Map
-- [ ] Dequeue
-- [ ] Array
-- [ ] Pair
-- [ ] Tuple
-- [ ] List
+- [ ] Shared Ptr + Make Shared + Deleter
 - [ ] Concurrent Hashmap
 
 ## vector

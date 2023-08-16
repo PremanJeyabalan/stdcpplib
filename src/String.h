@@ -351,6 +351,75 @@ namespace CustomStd {
             return *this;
         }
 
+        string& erase(size_t index = 0, size_t count = npos) {
+            const size_t curr_size = size();
+            size_t str_size = std::min(count, curr_size - index);
+            size_t resized = curr_size - (index+str_size);
+
+            char* data = ptr();
+            memcpy(data + index, data + index + str_size, resized);
+
+            if (is_short()) set_short_size(curr_size - str_size);
+            else _long.size = curr_size - str_size;
+            *(ptr() + size()) = '\0';
+
+            return *this;
+        }
+
+        void push_back(char ch) {
+            const size_t curr_size = size();
+            const size_t curr_cap = capacity();
+
+            if (curr_size == curr_cap) reserve(curr_cap * 2);
+
+            *(ptr() + curr_size) = ch;
+            if (is_short()) set_short_size(short_size() + 1);
+            else _long.size++;
+        }
+
+        void pop_back() {
+            this->erase(size() - 1);
+        }
+
+        string& append(size_t count, char c) {
+            this->insert(size(), count, c);
+            return *this;
+        }
+
+        string& append(const string& str) {
+            this->insert(size(), str);
+            return *this;
+        }
+
+        string& append(const string& str, size_t pos, size_t count = npos) {
+            this->insert(size(), str, pos, count);
+            return *this;
+        }
+
+        string& append(const char* str, size_t count) {
+            this->insert(size(), str, count);
+            return *this;
+        }
+
+        string& append(const char* str) {
+            this->insert(size(), str);
+        }
+
+        string& operator+=(const string& str) {
+            this->append(str);
+        }
+
+        string& operator+=(char ch) {
+            this->append(1, ch);
+            return *this;
+        }
+
+        string& operator+=(const char* str) {
+            this->append(str);
+            return *this;
+        }
+
+
         string substr( size_t pos = 0, size_t count = npos ) const {
             if (pos > size()) throw std::out_of_range("out of range");
 
